@@ -89,28 +89,36 @@ class MDPExplore(wx.Frame):
     def generateMDPGraph(self, u, k, labels):
         """ Construct the (graphviz) graph of the MDP """
         line_width = 5.0
+        mdp = gv.Digraph(format='png')
+        # Set layout engine (see other options in graphviz/docs/layouts)
+        mdp.engine = 'sfdp'
         
         if u > number_of_controls():
             print("ERROR: %i is not a valid control action!" % u)
             u = 0
-
-        mdp = gv.Digraph(format='png')
-
-        # Create the nodes in the graph
-        for i in range(0, number_of_states()):
-            if i in labels:
-                if not self.hasUI or not self.chb_state_numbers.GetValue():
-                    mdp.node(str(i), labels[i])
-                else:
-                    mdp.node(str(i), str(i) + ':' + labels[i])
-            else:
-                mdp.node(str(i), 'Node %i' % i)
-
-        # Add edges
+        
         if u == 0:
             action = 'Do nothing'
         elif u == 1:
             action = 'Repair'
+
+        for i in range(0, number_of_states()):
+            # State nodes
+            if i in labels:
+                # Whether or not to show state numbers in state nodes
+                if not self.hasUI or not self.chb_state_numbers.GetValue():
+                    mdp.node(str(i), labels[i], style='filled', fillcolor='lightblue')
+                else:
+                    mdp.node(str(i), str(i) + ':' + labels[i], style='filled', fillcolor='lightblue')
+            else:
+                mdp.node(str(i), 'Node %i' % i)
+            
+            # Action nodes
+            mdp.node(str(i) + str(u), action, shape='box')
+            # Edges from state to action nodes
+            mdp.edge(str(i), str(i) + str(u), style='dashed')            
+
+        # Create edges
         for i in range(0, number_of_states()):
             psum = 0.0
             for j in range(0, number_of_states()):
@@ -118,24 +126,17 @@ class MDPExplore(wx.Frame):
 
                 if TProb(i, j, k, u) > 0:
                     if not self.hasUI:
-                        mdp.node(str(i) + str(j), action, shape='box')
-                        mdp.edge(str(i), str(i) + str(j), style='dashed')
-                        mdp.edge(str(i) + str(j), str(j), '%.2f' % p, {'penwidth':str(line_width * p)})
-
+                        mdp.edge(str(i) + str(u), str(j), '%.2f' % p, {'penwidth':str(line_width * p)})
                     else:
+                        # Whether or not to show probabilities
                         if self.chb_probs.GetValue():
+                            # Whether or not to show probabilities using percentage values
                             if self.chb_use_percentage.GetValue():
-                                mdp.node(str(i) + str(j), action, shape='box')
-                                mdp.edge(str(i), str(i) + str(j), style='dashed')
-                                mdp.edge(str(i) + str(j), str(j), '%.1f%%' % (100.0 * p), {'penwidth':str(line_width * p)})
+                                mdp.edge(str(i) + str(u), str(j), '%.1f%%' % (100.0 * p), {'penwidth':str(line_width * p)})
                             else:
-                                mdp.node(str(i) + str(j), action, shape='box')
-                                mdp.edge(str(i), str(i) + str(j), style='dashed')
-                                mdp.edge(str(i) + str(j), str(j), '%.2f' % p, {'penwidth':str(line_width * p)})
+                                mdp.edge(str(i) + str(u), str(j), '%.2f' % p, {'penwidth':str(line_width * p)})
                         else:
-                            mdp.node(str(i) + str(j), action, shape='box')
-                            mdp.edge(str(i), str(i) + str(j), style='dashed')
-                            mdp.edge(str(i) + str(j), str(j), None, {'penwidth':str(line_width * p)})
+                            mdp.edge(str(i) + str(u), str(j), None, {'penwidth':str(line_width * p)})
 
                     psum += p
 
@@ -147,11 +148,11 @@ class MDPExplore(wx.Frame):
 
     def plotMDPGraph(self, mdp):
         """ Render graphviz graph of the MDP to file """
-        mdp.render(filename='img/mdp')
+        mdp.render(filename='img/mdp', cleanup=True)
 
         if self.hasUI and self.chb_save_pdf.GetValue():
             mdp.format = 'pdf'
-            mdp.render(filename='img/mdp')
+            mdp.render(filename='img/mdp', cleanup=True)
             mdp.format = 'png'
 
     def updateMDPPlot(self, e):
