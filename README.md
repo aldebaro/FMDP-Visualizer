@@ -6,26 +6,23 @@ The original project aimed at graphs of the
 Markov chain underlying the *Markov Decision Process* (MDP), and did not
 support action nodes.
 
-TO-DO:
-It is missing to show the action nodes of a FMDP. Only the state nodes are shown.
-
-I also created the fork to support Python 3 and above, and provide some installation advice.
+I also created the fork to support Python 3 and above and provided some installation advice.
 
 Aldebaro. March 2024
 
 ## Dependencies
 Requirements: `graphviz` and `wxPython`. You also need `numpy` and `scipy`.
 
-Using Conda on Windows, one can create an environment with these dependencies by running `conda create --name fmdp --file .\environments.txt` on the projects root folder and activate it by running `conda activate fmdp`.
+Using Conda on Windows, one can create an environment with these dependencies by running `conda create --name fmdp --file .\environments.txt` on the project root folder and activate it by running `conda activate fmdp`.
 
-Alternatively, one can also install the require packages in a conda environment using `conda install graphviz python-graphviz wxpython numpy scipy`. I recommend using python 3.7.1.
+Alternatively, one can also install the require packages in a conda environment using `conda install graphviz python-graphviz wxpython numpy scipy`. I recommend using Python 3.7.1.
 
 Pedro, March 2024.
 
 
 ## Usage
 
-First define the transition probabilities of the MDP in `mdp.py` along with the
+First, define the transition probabilities of the MDP in `mdp.py` along with the
 number of actions and the state labels. A variant of the standard machine
 replacement problem is provided as an example in the file.
 
